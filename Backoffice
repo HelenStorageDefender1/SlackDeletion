@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BO Features - Slack Integration Deletion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: normal;
+        }
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        .feature-details {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+        .feature-details strong {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .feature-details small {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Standard Toggle Styling (using basic CSS) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #007bff;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Delete Button Styling */
+        #deleteSlackData {
+            padding: 8px 12px;
+            border: 1px solid #dc3545;
+            border-radius: 5px;
+            background-color: transparent;
+            color: #dc3545;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        #deleteSlackData:not([disabled]):hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        #deleteSlackData:disabled {
+            border-color: #f8d7da;
+            color: #f5c6cb;
+            cursor: not-allowed;
+            background-color: #fff;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .modal-content h2 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+        .modal-content p {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .modal-content button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #confirmDelete {
+            background-color: #dc3545;
+            color: white;
+        }
+        #cancelDelete {
+            background-color: #6c757d;
+            color: white;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="#">&larr;</a>
+    <h1>TRADE SHOWS ORG: Features</h1>
+</div>
+
+<div class="feature-item">
+    <div class="feature-details">
+        <strong>Organization Weekly Summary Email</strong>
+        <small>Enables organizations to receive a weekly summary email</small>
+    </div>
+    <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider"></span>
+    </label>
+</div>
+
+<div class="feature-item">
+    <div class="feature-details">
+        <strong>Task Management</strong>
+        <small>Enable Task Management in the organization.</small>
+    </div>
+    <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider"></span>
+    </label>
+</div>
+
+<div class="feature-item" id="slackIntegrationRow">
+    <div class="feature-details">
+        <strong>Slack Integration</strong>
+        <small>Controls access to the Slack Marketplace integration features.</small>
+    </div>
+    <div class="controls">
+        <button id="deleteSlackData" disabled title="The feature must be disabled before data can be deleted.">
+            Permanently Delete Data
+        </button>
+
+        <label class="switch">
+            <input type="checkbox" id="slackToggle" checked>
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirm Permanent Data Deletion</h2>
+        <p>This action is **irreversible** and will permanently delete **all** data and tokens associated with the Slack integration for **TRADE SHOWS ORG**. This is required to fulfill a formal data removal request.</p>
+        <button id="cancelDelete">Cancel</button>
+        <button id="confirmDelete">Yes, Permanently Delete Data</button>
+    </div>
+</div>
+
+<script>
+    const slackToggle = document.getElementById('slackToggle');
+    const deleteButton = document.getElementById('deleteSlackData');
+    const modal = document.getElementById('deleteModal');
+    const confirmButton = document.getElementById('confirmDelete');
+    const cancelButton = document.getElementById('cancelDelete');
+
+    // Function to update the delete button state
+    function updateDeleteButtonState() {
+        if (slackToggle.checked) {
+            // Feature is ON -> Deletion is disabled
+            deleteButton.disabled = true;
+            deleteButton.title = "The feature must be disabled before data can be deleted.";
+        } else {
+            // Feature is OFF -> Deletion is enabled
+            deleteButton.disabled = false;
+            deleteButton.title = "Permanently delete all Slack data for this organization.";
+        }
+    }
+
+    // Initial state setup
+    updateDeleteButtonState();
+
+    // Event listener for the toggle change
+    slackToggle.addEventListener('change', updateDeleteButtonState);
+
+    // Event listener to show the modal when the delete button is clicked
+    deleteButton.addEventListener('click', () => {
+        if (!deleteButton.disabled) {
+            modal.style.display = 'block';
+        }
+    });
+
+    // Event listener to close the modal
+    cancelButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Event listener for the final confirmation
+    confirmButton.addEventListener('click', () => {
+        // --- BACKEND API CALL WOULD GO HERE ---
+        console.log('API CALL: Initiating permanent deletion of Slack integration data for TRADE SHOWS ORG...');
+        alert('Data deletion process initiated. The records will be purged from the database shortly.');
+        
+        // After deletion, you would typically disable the button and perhaps remove the entire row
+        deleteButton.disabled = true;
+        deleteButton.textContent = "Data Deleted";
+        deleteButton.style.backgroundColor = '#f8d7da';
+        deleteButton.style.color = '#721c24';
+        deleteButton.style.borderColor = '#f5c6cb';
+        deleteButton.title = "Slack data has been purged and cannot be recovered.";
+        
+        modal.style.display = 'none';
+    });
+
+    // Close the modal if the user clicks outside of it
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
